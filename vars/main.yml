@@ -1,0 +1,51 @@
+---
+
+##############################################################################
+# Configuration
+##############################################################################
+_nomad_default_config:
+  data_dir: "{{ _nomad_data_dir }}"
+
+##############################################################################
+# Variables
+##############################################################################
+_nomad_certs_dir: "{{ _nomad_certs_dir_by_os_family[ ansible_facts['os_family'] ] }}"
+_nomad_conf_dir: "{{ _nomad_conf_dir_by_os_family[ ansible_facts['os_family'] ] }}"
+_nomad_data_dir: "{{ _nomad_data_dir_by_os_family[ ansible_facts['os_family'] ] }}"
+_nomad_pkgs: "{{ _nomad_pkgs_by_os_family[ ansible_facts['os_family'] ] }}"
+_nomad_root_group: "{{ _nomad_root_group_by_os_family[ ansible_facts['os_family'] ] }}"
+_nomad_user: "{{ _nomad_user_by_os_family[ ansible_facts['os_family'] ] }}"
+_nomad_group: "{{ _nomad_group_by_os_family[ ansible_facts['os_family'] ] }}"
+
+##############################################################################
+# Distributions' dictionaries
+##############################################################################
+_nomad_pkgs_by_os_family:
+  Debian:
+    - 'unzip'
+  OpenBSD:
+    - 'nomad'
+
+_nomad_root_group_by_os_family:
+  Debian: 'root'
+  OpenBSD: 'wheel'
+
+_nomad_user_by_os_family:
+  Debian: 'nomad'
+  OpenBSD: '_nomad'
+
+_nomad_group_by_os_family:
+  Debian: 'nomad'
+  OpenBSD: '_nomad'
+
+_nomad_conf_dir_by_os_family:
+  Debian: '/etc/nomad'
+  OpenBSD: '/etc/nomad'
+
+_nomad_certs_dir_by_os_family:
+  Debian: '/etc/ssl/nomad'
+  OpenBSD: '/etc/ssl/nomad'
+
+_nomad_data_dir_by_os_family:
+  Debian: '/var/lib/nomad'
+  OpenBSD: '/var/nomad'

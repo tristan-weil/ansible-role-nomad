@@ -1,0 +1,9 @@
+---
+
+- src: 'https://github.com/tristan-weil/ansible-role-pkg.git'
+  version: 'master'
+  scm: 'git'
+
+- src: 'https://github.com/tristan-weil/ansible-role-verify_artifact.git'
+  version: 'master'
+  scm: 'git'

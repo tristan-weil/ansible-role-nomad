@@ -1,0 +1,11 @@
+---
+
+- name: 'nomad_restart_handler'
+  service:
+    name: 'nomad'
+    state: 'restarted'
+
+- name: 'nomad_reload_handler'
+  service:
+    name: 'nomad'
+    state: 'reloaded'

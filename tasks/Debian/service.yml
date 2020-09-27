@@ -1,0 +1,30 @@
+---
+
+- name: 'install systemd service'
+  template:
+    src: 'Debian/lib/systemd/system/nomad.service.client.j2'
+    dest: '/lib/systemd/system/nomad.service'
+    owner: 'root'
+    group: "{{ _nomad_root_group }}"
+    mode: '0644'
+  when: nomad_config.client.enabled | default(False) | bool
+  notify:
+    - 'nomad_restart_handler'
+
+- name: 'install systemd service'
+  template:
+    src: 'Debian/lib/systemd/system/nomad.service.server.j2'
+    dest: '/lib/systemd/system/nomad.service'
+    owner: 'root'
+    group: "{{ _nomad_root_group }}"
+    mode: '0644'
+  when: nomad_config.server.enabled | default(False) | bool
+  notify:
+    - 'nomad_restart_handler'
+
+- name: 'start nomad service'
+  systemd:
+    name: 'nomad'
+    enabled: True
+    daemon_reload: True
+    state: 'started'

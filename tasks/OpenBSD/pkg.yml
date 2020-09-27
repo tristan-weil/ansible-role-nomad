@@ -1,0 +1,6 @@
+---
+
+- include_role:
+    name: 'ansible-role-pkg'
+  vars:
+    pkg_list: "{{ _nomad_pkgs }}"

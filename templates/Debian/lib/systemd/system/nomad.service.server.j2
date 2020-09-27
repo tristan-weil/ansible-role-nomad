@@ -1,0 +1,54 @@
+[Unit]
+Description=Nomad agent {{ nomad_artifact_version }}
+Documentation=https://www.nomadproject.io/docs/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+; User and group the process will run as
+User={{ _nomad_user }}
+Group={{ _nomad_group }}
+
+; Start/Restart
+ExecStart=/usr/sbin/nomad agent -config {{ _nomad_conf_dir }}
+ExecReload=/bin/kill -HUP $MAINPID
+
+; Restart on crash
+Restart=on-failure
+
+; Umask
+UMask=0077
+
+; Kill mode
+KillMode=process
+KillSignal=SIGINT
+
+; Limits
+LimitNOFILE={{ nomad_daemon_nofiles }}
+LimitNPROC={{ nomad_daemon_nproc }}
+TasksMax={{ nomad_daemon_tasksmax }}
+
+; Use private /tmp and /var/tmp, which are discarded after it stops
+PrivateTmp=true
+; Use a minimal /dev
+PrivateDevices=true
+; Hide /home, /root, and /run/user
+ProtectHome=true
+; Make sure all directories are protected
+ProtectSystem=strict
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+; Cannot change privileges
+NoNewPrivileges=true
+; Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
+
+; Allow to write on following paths
+ReadWritePaths={{ _nomad_data_dir }}
+
+; Syslog configuration
+SyslogIdentifier=nomad
+
+[Install]
+WantedBy=multi-user.target

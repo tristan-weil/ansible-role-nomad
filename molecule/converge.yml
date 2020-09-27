@@ -1,0 +1,18 @@
+---
+
+- hosts: all
+  name: 'Converge'
+  become: True
+
+  tasks:
+    - import_role:
+        name: 'ansible-role-nomad'
+      vars:
+        nomad_config:
+          leave_on_interrupt: 'true'
+          leave_on_terminate: 'true'
+          server:
+            enabled: 'true'
+            bootstrap_expect: 1
+            server_join:
+              retry_join: ['127.0.0.1']

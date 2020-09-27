@@ -1,0 +1,89 @@
+---
+
+- include_role:
+    name: 'ansible-role-pkg'
+  vars:
+    pkg_list: "{{ _nomad_pkgs }}"
+
+- name: 'delete the version file if requested'
+  file:
+    path: "{{ nomad_artifact_version_flag_path }}"
+    state: 'absent'
+  when: nomad_artifact_force_update
+
+- name: 'check if the version file exists'
+  stat:
+    path: "{{ nomad_artifact_version_flag_path }}"
+  register: __nomad_version_file_check_result
+
+- name: 'get the current installed version'
+  slurp:
+    src: "{{ nomad_artifact_version_flag_path }}"
+  register: __nomad_version_version_read_result
+  when: __nomad_version_file_check_result.stat.exists
+
+- name: 'activate update'
+  set_fact:
+    __nomad_do_update: True
+  when: >
+    (__nomad_version_version_read_result.content is not defined)
+    or
+    (__nomad_version_version_read_result.content is defined
+      and __nomad_version_version_read_result.content | b64decode != nomad_artifact_version)
+
+- name: 'unactivate update'
+  set_fact:
+    __nomad_do_update: False
+  when: >
+    __nomad_version_version_read_result.content is defined
+    and __nomad_version_version_read_result.content | b64decode == nomad_artifact_version
+
+- block:
+    - include_role:
+        name: 'ansible-role-verify_artifact'
+      vars:
+        verify_artifact_tmpdir: "{{ nomad_artifact_tmpdir }}"
+        verify_artifact_pgp_key: "{{ nomad_pgp_key }}"
+        verify_artifact_sum_url: "{{ nomad_artifact_sum_url }}"
+        verify_artifact_signature_url: "{{ nomad_artifact_signature_url }}"
+        verify_artifact_download_url: "{{ nomad_artifact_url }}"
+        verify_artifact_cksum_algo: "{{ nomad_artifact_sum_algo }}"
+
+    - name: 'unarchive archive in the temporary directory'
+      unarchive:
+        src: "{{ nomad_artifact_tmpdir }}/{{ nomad_artifact_url | basename }}"
+        dest: "{{ nomad_artifact_tmpdir }}"
+        owner: 'root'
+        group: "{{ _nomad_root_group }}"
+        mode: '0700'
+        remote_src: True
+
+    - name: 'install the binaries'
+      copy:
+        src: "{{ nomad_artifact_tmpdir }}/{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: 'root'
+        group: "{{ _nomad_root_group }}"
+        mode: '0755'
+        remote_src: True
+      loop:
+        - src: 'nomad'
+          dest: '/usr/sbin/nomad'
+      notify:
+        - 'nomad_restart_handler'
+
+    - name: 'write the version file'
+      copy:
+        content: "{{ nomad_artifact_version }}"
+        dest: "{{ nomad_artifact_version_flag_path }}"
+        owner: 'root'
+        group: "{{ _nomad_root_group }}"
+        mode: '0644'
+
+  always:
+    - name: 'delete tmpdir'
+      file:
+        path: "{{ nomad_artifact_tmpdir }}"
+        state: 'absent'
+
+  when: __nomad_do_update

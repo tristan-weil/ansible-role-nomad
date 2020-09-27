@@ -1,0 +1,21 @@
+{# ######################################## #}
+{# ##### MACROS ########################### #}
+{# ######################################## #}
+{% macro display_dict(dict, offset=0) -%}
+{% for (key, value) in dict|dictsort -%}
+{%      if value == 'true' or value == 'false' or value == 'on' or value == 'off' -%}
+{{ ' ' * (2 * offset) }}{{ key }} = {{ value }}
+{%      elif value is number -%}
+{{ ' ' * (2 * offset) }}{{ key }} = {{ value }}
+{%      elif value is string -%}
+{{ ' ' * (2 * offset) }}{{ key }} = "{{ value }}"
+{% elif value is mapping %}
+{{ key }} {
+{{ display_dict(value, offset=1) }}}
+{%      endif %}
+{%- endfor %}
+{%- endmacro %}
+{# ######################################## #}
+{# ##### MAIN ############################# #}
+{# ######################################## #}
+{{ display_dict(_nomad_default_config | combine(nomad_config, recursive=True)) }}

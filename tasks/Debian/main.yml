@@ -1,0 +1,9 @@
+---
+
+- include_tasks: 'user_mgmt.yml'
+
+- include_tasks: 'pkg.yml'
+
+- include_tasks: '../config.yml'
+
+- include_tasks: 'service.yml'

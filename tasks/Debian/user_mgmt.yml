@@ -1,0 +1,35 @@
+---
+
+- name: 'create group'
+  group:
+    name: "{{ _nomad_group }}"
+    gid: "{{ _nomad_groupid | default(omit) }}"
+    system: True
+
+- name: 'create user'
+  user:
+    name: "{{ _nomad_user }}"
+    group: "{{ _nomad_group }}"
+    home: '/nonexistent'
+    create_home: False
+    shell: '/bin/false'
+    uid: "{{ _nomad_userid | default(omit) }}"
+    system: True
+
+- name: 'create directories'
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+    state: 'directory'
+  loop:
+    - path: "{{ _nomad_conf_dir }}"
+      owner: 'root'
+      group: "{{ _nomad_group }}"
+      mode: "0750"
+
+    - path: "{{ _nomad_data_dir }}"
+      owner: "{{ _nomad_user }}"
+      group: "{{ _nomad_group }}"
+      mode: "0750"

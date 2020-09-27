@@ -1,0 +1,15 @@
+---
+
+- hosts: all
+  name: 'Verify'
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: 'Check service is enabled/started'
+      service:
+        name: 'nomad'
+        enabled: True
+        state: 'started'
+      register: __verify_svc
+      failed_when: __verify_svc.changed

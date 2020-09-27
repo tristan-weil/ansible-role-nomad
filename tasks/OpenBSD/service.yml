@@ -1,0 +1,29 @@
+---
+
+- name: 'install rcctl service'
+  template:
+    src: 'OpenBSD/etc/rc.d/nomad.client.j2'
+    dest: '/etc/rc.d/nomad'
+    owner: 'root'
+    group: "{{ _nomad_root_group }}"
+    mode: '0755'
+  when: nomad_config.client.enabled | default(False) | bool
+  notify:
+    - 'nomad_restart_handler'
+
+- name: 'install rcctl service'
+  template:
+    src: 'OpenBSD/etc/rc.d/nomad.server.j2'
+    dest: '/etc/rc.d/nomad'
+    owner: 'root'
+    group: "{{ _nomad_root_group }}"
+    mode: '0755'
+  when: nomad_config.server.enabled | default(False) | bool
+  notify:
+    - 'nomad_restart_handler'
+
+- name: 'start nomad service'
+  service:
+    name: 'nomad'
+    enabled: True
+    state: 'started'
